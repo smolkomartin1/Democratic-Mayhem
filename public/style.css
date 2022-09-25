@@ -1,0 +1,80 @@
+body {
+    background-image:url("./DemocraticMayhemLanding.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    flex-direction: column;
+    overflow: hidden;
+}
+* {
+    font-family: "Georgia";
+    box-sizing: padding-box;
+}
+
+@keyframes fade-in {
+  0%   {opacity: 0;}
+  25%  {opacity: .25;}
+  50%  {opacity: .5;}
+  75%  {opacity: .75;}
+  100% {opacity: 1;}
+}
+
+#login{
+ text-align: center;
+ height: 10%;
+ animation-name: fade-in;
+ animation-duration: 3s;
+ animation-timing-function: linear;
+ width: 500px;
+ position: relative;
+ top: 10%;
+ border: 3px solid rgb(177, 142, 142);
+ padding: 20px 20px 90px 20px;
+ background: #4f3c1f;
+ border-radius: 20px;
+}
+
+.g-signin2 {
+  display: flex;
+  justify-content: center;
+}
+
+input {
+    display: block;
+    border: 2px solid #ccc;
+    width: 50%;
+    padding: 10px;
+    margin: 10px auto;
+    border-radius: 5px;
+}
+label {
+    color: #ffff;
+    font-size: 18px;
+    padding: 10px;
+}
+button {
+    color: #fff;
+    border-radius: 5px;
+    margin-right: 10px;
+    border: none;
+}
+#buttonImage{
+    height:40px;
+}
+button:hover{
+    opacity: .50;
+}
+
+#bottom{
+    display: flex;
+    justify-content: center;
+    position: fixed;bottom: 0;
+    padding-bottom: 1em;
+}
+
+#bottom a {
+  color: #4f3c1f;
+}

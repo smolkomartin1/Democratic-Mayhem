@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>LOGIN</title>
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <!-- <meta name="google-signin-client_id" content="1082694667220-tgi1dtufrgjmnjig5625un3u8unq8c49.apps.googleusercontent.com"> -->
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <script src="https://www.gstatic.com/firebasejs/9.6.6/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.6/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.6/firebase-auth.js"></script>
+    <script src="index.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+    <div id="login">
+        <label>Enter your User ID!</label>
+        <input type="text" id="userName" placeholder="Username" required autofocus><br>
+        <!--  -->
+        <!-- <div class="g-signin2" data-onsuccess="onSignIn"></div>-->
+        <button id = "google" onclick="signInGoogle()"><img id = "buttonImage" src="./googlelogo.png"></button>
+     </div>
+     <div id="bottom">
+       <a id="credits" href="credits.html" target="_blank">Credits</a>&ensp;
+       <a id="terms" href="termsand.html" target="_blank">Terms & Conditions</a>
+     </div>
+</body>
+<script>
+    var socket = io();
+    var userN = "";
+    sessionStorage.clear();
+
+    function onSignIn(googleUser) {
+        var inp =document.getElementById("userName");
+        userN = inp.value;
+        if (userN == ""){
+            alert("Please enter a username and sign in again")
+        } else{
+            var profile = googleUser.getBasicProfile();
+            var email = profile.getEmail();
+            var id_token = googleUser.getAuthResponse().id_token;
+
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/');
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.onload = function() {
+              console.log('Signed in as: ' + xhr.responseText);
+            };
+            xhr.send(JSON.stringify({token: id_token}));
+
+            socket.emit("auth",userN, id_token, email);
+            console.log(id_token)
+        }
+    }
+    socket.on("error", (status)=>{
+        alert("Error: "+status+ ". Sign out of Google and try again.")
+    });
+    socket.on("handshake",(index,token,messages,coverArr,leader)=>{
+        sessionStorage.setItem("userName",userN);
+        sessionStorage.setItem("index",index);
+        sessionStorage.setItem("token",token);
+        sessionStorage.setItem("messages",JSON.stringify(messages));
+        sessionStorage.setItem("covers",JSON.stringify(coverArr));
+        sessionStorage.setItem("leader",JSON.stringify(leader));
+        window.location.replace("/game");
+    });
+	 function makeid(length) {
+    var result           = '';
+    var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var charactersLength = characters.length;
+    for ( var i = 0; i < length; i++ ) {
+        result += characters.charAt(Math.floor(Math.random() * 
+        charactersLength));
+    }
+    return result;
+    }
+    function devDoor(tuser){
+        socket.emit("auth",tuser,makeid(16),makeid(16));
+    }
+
+    function signInGoogle(ev){
+        console.log("TRying")
+        gapi.load('auth2',function(){
+            var auth2 = gapi.auth2.init({
+                client_id: '1082694667220-tgi1dtufrgjmnjig5625un3u8unq8c49.apps.googleusercontent.com',
+                scope: 'profile email'
+            }).then(auth2 =>{
+                auth2.signIn().then((googleUser)=>{
+                    onSignIn(googleUser);
+                });
+            });
+        });
+        return false;
+    }
+
+    window.addEventListener('keydown',function(ev){
+        if (ev.key == "Enter"){
+            signInGoogle(ev);
+            return false;
+        }
+    },true);
+</script>
+</html>

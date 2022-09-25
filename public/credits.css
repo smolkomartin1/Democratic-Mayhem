@@ -1,0 +1,15 @@
+.content{
+  display: flex;
+  justify-content: center;
+  column-gap: 4em;
+  /* font-size: small; */
+}
+
+.flexbox{
+  display: flex;
+  flex-direction: column;
+}
+
+th, td{
+  padding: 1em;
+}

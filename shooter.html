@@ -1,0 +1,980 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Democratic Mayhem</title>
+<link rel="stylesheet" href="shooter.css">
+<link rel="shortcut icon" type="image/x-icon" href="logo.png">
+
+<!--THESE LINES NEED TO BE COPIED AND PASTED INTO THE HEAD OF THE SIGN UP HTML FILE-->
+<script src="https://www.gstatic.com/firebasejs/9.6.6/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.6/firebase-database.js"></script>
+<script src="index.js"></script>
+
+
+</head>
+<body>
+	<div class = "content">
+		<div class="leftside">
+			<p class="healthbar"><span id="player1"></span><span style="float: right;"><span id="ketchup1"><img id=ketchupAnim1 src="placeholder.png"></span>&ensp; <img id="img1p1" src="alive.png"> <img id="img2p1" src="alive.png"> <img id="img3p1" src="alive.png"></span></p>
+			<div class="can">
+				<canvas id="myCanvas" width="500" height="500">
+				</canvas>
+			</div>
+			<p class="healthbar"><span id="player2"></span><span style="float:right;"><span id="ketchup2"><img id="ketchupAnim2" src="placeholder.png"></span>&ensp; <img id="img1p2" src="alive.png"> <img id="img2p2" src="alive.png"> <img id="img3p2" src="alive.png"></span></p>
+		</div>
+<div class="rightside">
+	<div class="poll">
+		<div id="queue">
+			<p>You are currently: </p>
+			<p id="queuePar"></p>
+		</div>
+		<button id="button1" type="button" style="display:none;" name="bighead">Low friction</button>
+		<button id="button2" type="button" style="display:none;" name="fastermovement">2x Speed</button>
+		<button id="button3" type="button" style="display:none;" name="bigprojectiles">Bigger Projectiles</button>
+		<p class="newPoll">NEW POLL !</p>
+		<div id="timerBar"></div>
+	</div>
+	<p id="saloon">SALOON CHAT</p>
+	<div id="chatbox">
+		<div id="messagebox">
+		</div>
+	</div>
+	<div id="typingbox">
+		<input id=textentry type="text" name="chat">
+		<button id="sendButton"type="button" name="send">Send</button>
+	</div>
+</div>
+<div class="leaderboard">
+	<p class="wanted"><img id="bulletHole1" src="bulletHole1.png">MOST WANTED<img id="bulletHole2" src="bulletHole2.png"></p>
+	<table id="table">
+<thead>
+	<tr>
+		<th>Rank</th>
+		<th style="min-width: 10em;">Player</th>
+		<th>Wins</th>
+	</tr>
+</thead>
+<tbody id = "leaderTable">
+	<tr>
+		<td>1</td>
+		<td id="one"> </td>
+		<td id="score1"> </td>
+	</tr>
+	<tr>
+		<td>2</td>
+		<td id="two"> </td>
+		<td id="score2"> </td>
+	</tr>
+	<tr>
+		<td>3</td>
+		<td id="three"> </td>
+		<td id="score3"> </td>
+	</tr>
+	<tr>
+		<td>4</td>
+		<td id="four"> </td>
+		<td id="score4"> </td>
+	</tr>
+	<tr>
+		<td>5</td>
+		<td id="five"> </td>
+		<td id="score5"> </td>
+	</tr>
+	<tr>
+		<td>6</td>
+		<td id="six"> </td>
+		<td id="score6"> </td>
+	</tr>
+	<tr>
+		<td>7</td>
+		<td id="seven"> </td>
+		<td id="score7"> </td>
+	</tr>
+	<tr>
+		<td>8</td>
+		<td id="eight"> </td>
+		<td id="score8"> </td>
+	</tr>
+	<tr>
+		<td>9</td>
+		<td id="nine"> </td>
+		<td id="score9"> </td>
+	</tr>
+	<tr>
+		<td>10</td>
+		<td id="ten"> </td>
+		<td id="score10"> </td>
+	</tr>
+</tbody>
+</table>
+<p class="wanted"><img id="bulletHole3" src="bulletHole1.png">HOW TO PLAY<img src="bulletHole3.png"></p>
+<img src="instructions.png">
+</div>
+</div>
+</body>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+//Javascript stuff
+
+var socket = io();
+if (sessionStorage.getItem("token")== undefined){
+	window.location.replace("/");
+}
+
+var canvas = document.getElementById('myCanvas')
+var ctx = canvas.getContext('2d');
+
+//images
+var sand = new Image();
+sand.src = 'sand.png';
+var character = [new Image(),new Image(),new Image()];
+for (i=1;i<4;i++){
+	character[i-1].src = 'char'+i+'.png';
+}
+var coverImg = [new Image(),new Image(),new Image()];
+for (i=1;i<4;i++){
+	coverImg[i-1].src = 'crate'+i+'.png';
+}
+var water1  = new Image();
+water1.src = 'wat1.png';
+var water2  = new Image();
+water2.src = 'wat2.png';
+var waterExplosion = [new Image(),new Image(),new Image(),new Image()];
+for (i=1;i<5;i++){
+	waterExplosion[i-1].src = 'waterExplosion'+i+'.png';
+}
+var tomatoImg = [new Image(),new Image(),new Image(),new Image()];
+for (i=1;i<5;i++){
+	tomatoImg[i-1].src = 'tomato'+i+'.png';
+}
+var confettiImg = [new Image(),new Image(),new Image(),new Image()];
+for (i=1;i<5;i++){
+	confettiImg[i-1].src = 'confetti'+i+'.png';
+}
+
+var w;
+var bigScale;
+
+//Sounds
+var gameTheme = new sound("gameTheme.mp3");
+document.getElementById("gameTheme").loop = true;
+var tomatoSplat = new sound("tomatoSplat.mp3");
+var waterShoot = 	new sound("waterShoot.mp3");
+var tomatoShoot = new sound("tomatoShoot.mp3");
+var bounce = new sound("bounce.mp3");
+var boxHit = new sound("boxHit.mp3");
+var boxBroken = new sound("boxBroken.mp3");
+var playerHit = new sound("playerHit.mp3");
+var whistle = new sound("whistle.mp3");
+
+function resizeCanvas(){
+	//var w = window.innerWidth/2;
+	w = window.innerHeight*0.8;
+	ctx.canvas.width = w;
+	ctx.canvas.height = w;
+	bigScale = w/500;
+}
+resizeCanvas()
+
+class Player {
+  	constructor(x,y,rot) {
+    	this.x = x;
+    	this.y = y;
+		this.rot = rot;
+		this.image = character[0]
+		this.attCool = 0;
+		this.dmgState = 0;
+		this.tomato = new tomato();
+		this.deathAnim  =0;
+  	}
+}
+class projectile{
+	constructor(x,y,angle,speed,size,prId,curve,loop){
+		this.x = x;
+		this.y = y;
+		this.imgState = false; //Needed for animation, says its on frame 1
+		this.image = water1;
+		this.proId = prId;
+		this.rot = angle;
+		this.curving = curve;
+		this.loop = loop;
+		this.age = 0;
+		this.speed = speed;
+		this.active = true;
+		this.size =size;
+		this.explosing = 99;
+	}
+	move(){
+		if (this.x < 0 || this.x > 500){
+			if (this.loop){
+				this.x = 500*(1-Math.round(this.x/500));
+				this.loop = false;
+			}else{
+				this.active = false; //Tells main code to delete this object
+			}
+		}
+		if (this.y < 0 || this.y > 500){
+			//console.log(this.x,this.y)
+			if (this.loop){
+				this.y = 500*(1-Math.round(this.x/500));
+				this.loop = false;
+			}else{
+				this.active = false; //Tells main code to delete this object
+			}
+		}
+		if (this.curving){
+			this.speed = [this.speed[0]*Math.cos(0.05)-this.speed[1]*Math.sin(0.05),
+						this.speed[0]*Math.sin(0.05)+this.speed[1]*Math.cos(0.05)]
+			this.rot = Math.atan2(this.speed[1],this.speed[0])-(Math.PI/2);
+		}
+		this.age++;
+		//console.log(this.x);
+		if (this.explosing !=99){
+			if (this.explosing==4){
+				this.active= false;
+			}else{
+				this.image = waterExplosion[this.explosing];
+				this.explosing+=1
+			}
+		}else{
+			this.x += this.speed[0];
+			this.y += this.speed[1];
+			this.animate();
+		}
+	}
+	animate(){
+		if (this.imgState){
+			this.image = water1; //Changes to different image
+			this.imgState = false;
+		}else{
+			this.image = water2; //Changes to different image
+			this.imgState = true;
+		}
+	}
+}
+class tomato{
+	constructor(){
+		this.imgState = false; //Needed for animation, says its on frame 1
+		this.image = tomatoImg[0];
+		this.active=false;
+	}
+	create(x,y,angle,speed,size, fric){
+		this.x = x;
+		this.y = y;
+		this.rot = angle;
+		this.speed = speed;
+		this.active = true;
+		this.image = tomatoImg[0];
+		this.size =size;
+		this.explosing = 0;
+		this.fuse=80;
+		this.fric = fric
+		this.opacity=1;
+	}
+	move(){
+		if (this.x < 0+(this.size*10) && this.speed[0]<0){
+			this.speed[0] *= -1;
+		}
+		if (this.x > 500-(this.size*10) && this.speed[0]>0){
+			this.speed[0] *= -1;
+		}
+		if( this.y < 0+(this.size*10) && this.speed[1]<0){
+			this.speed[1] *= -1;
+		}
+		if (this.y > 500-(this.size*10) && this.speed[1]>0){
+			this.speed[1] *= -1;
+		}
+
+		let xCol, yCol = false;
+		let nextMove = [this.x + this.speed[0], this.y + this.speed[1]];	//Finds the potential next move
+		covers.forEach(i => {	//Loops through all covers and checks if the tomato has collided with one
+  		//Checks if the tommato were to collide with a cover in the x axis only
+			xCol = i.x > nextMove[0]-(30) && i.x < nextMove[0]+(30);
+			yCol = i.y > this.y-(30) && i.y < this.y+(30);
+			if (xCol && yCol) {this.speed[0] *= -1}
+
+			//Checks if the tommato were to collide with a cover in the y axis only
+			xCol = i.x > this.x-(30) && i.x < this.x+(30);
+			yCol = i.y > nextMove[1]-(30) && i.y < nextMove[1]+(30);
+			if (xCol && yCol) {this.speed[1] *= -1}
+		});
+		this.speed[0]*=this.fric;
+		this.speed[1]*=this.fric;
+
+
+
+		//Working on this. Still not done
+		//this.size = 1+((this.speed[0]**2+this.speed[1]**2)**0.5);
+
+		if (this.fuse == 0){
+			if (this.explosing<8){
+				if (this.explosing == 5) {
+					tomatoSplat.play();
+				}
+				this.explosion()
+				this.explosing+=1
+			}else{
+				if (this.opacity >= 0.05){
+					this.opacity-=0.01;
+				}else{
+					this.active=false;
+				}
+			}
+		}else{
+			this.fuse--;
+			this.rot += ((this.speed[0]**2+this.speed[1]**2)**0.5)/15;
+			this.x += this.speed[0];
+			this.y += this.speed[1];}
+	}
+	animate(){
+		if (this.imgState){
+			this.image = water1; //Changes to different image
+			this.imgState = false;
+		}else{
+			this.image = water2; //Changes to different image
+			this.imgState = true;
+		}
+	}
+	explosion(){
+		this.image = tomatoImg[Math.floor(this.explosing/2)];
+	}
+}
+class Cover {
+	constructor(x,y,dmg=0) {
+		this.x = x;
+		this.y = y;
+		this.dmgState = dmg;
+		this.image = coverImg[dmg];
+	}
+}
+var playernum=sessionStorage.getItem("index");
+var token = sessionStorage.getItem("token");
+var id = socket.id;
+var userName = sessionStorage.getItem("userName");
+var messages = JSON.parse(sessionStorage.getItem("messages"));
+var coverArr = JSON.parse(sessionStorage.getItem("covers"));
+var leader = JSON.parse(sessionStorage.getItem("leader"));
+updateLeaderboard(leader);
+
+//Creates the covers in the frontend whenever a player connects
+covers = [];
+coverArr.forEach(function(element,ind){
+	covers.push(new Cover(element.x,element.y));
+});
+printmessages();
+socket.emit("updateID",token);
+socket.on("login",()=>{
+	window.location.replace("/");
+});
+socket.on("getId",(socketID)=>{
+	id = socketID;
+});
+
+var gameState=0;
+var players = [new Player(250,40,0),new Player(250,460,Math.PI)];
+
+var projs = []; //Creates projectile array
+
+var keys = [false,false,false,false]; //Stores information on what keys are pressed down.
+//Current mouse coords
+var mouseX = 0;
+var mouseY = 0;
+var noCharge = false;
+var currWait = 0;
+
+// Status of cheat codes
+var cheats=[false,false,false,false,false,
+			false,false,false,false,false];
+// Check if any of the cheacodes have been activated
+document.getElementById("button1").onclick = function() {cheatVote(0)};
+document.getElementById("button2").onclick = function() {cheatVote(1)};
+document.getElementById("button3").onclick = function() {cheatVote(2)};
+
+var cheatDes = ["Splash Frenzy","Low Friction","Coffee Rush",
+				"Ketchup Blast","Good Harvest","Drunk Cowboys",
+				"Behind You","Curving Water","Tomato Cannon",
+				"SlowMo", "Random Tomatos"]
+
+// Array for messages
+var messages = []
+document.getElementById("sendButton").onclick = function() {messagesend()};
+
+//draw function
+function draw() {
+	drawImage(sand, 250, 250,1,0); //draws background
+	//larger characters if cheat active
+	//var c1 = (cheat1 == 1) ? 1.4 : 1;
+	var c1 = 1;
+	//Draws players
+	if (players[0].deathAnim !=11 && players[0].image!=undefined){
+		drawImage(players[0].image, players[0].x, players[0].y,c1,players[0].rot);
+	}
+	if (players[1].deathAnim !=11 && players[1].image!=undefined){
+		drawImage(players[1].image, players[1].x, players[1].y,c1,players[1].rot);
+	}
+	if (players[0].tomato.active){
+		drawImage(players[0].tomato.image,players[0].tomato.x,players[0].tomato.y,players[0].tomato.size,players[0].tomato.rot,players[0].tomato.opacity);
+	}
+	if (players[1].tomato.active){
+		drawImage(players[1].tomato.image,players[1].tomato.x,players[1].tomato.y,players[1].tomato.size,players[1].tomato.rot,players[1].tomato.opacity);
+	}
+	if(charging!=0){
+		var points = [[-30,(2*charging)+25],[30,(2*charging)+25],[0,25]];
+		var direct = players[playernum].rot
+		for (i=0;i<points.length;i++){
+			points[i] = [((points[i][0]*Math.cos(direct))-(points[i][1]*Math.sin(direct))+players[playernum].x)*bigScale,
+						((points[i][0]*Math.sin(direct))+(points[i][1]*Math.cos(direct))+players[playernum].y)*bigScale]
+		}
+		drawPolygon(points,"rgb("+255*charging/50+","+255**(1-(charging/50))+",0)",0.4);
+	}
+
+	//Draws projectiles
+	projs.forEach(element => drawImage(element.image,element.x,element.y,element.size,element.rot));
+	if (hit){
+		var tempMath = Math.sin(Math.PI*(20-screenShake)/20)/2
+		//console.log(tempMath)
+		drawRectangle(0,0,w,w,"blue",tempMath)
+	}
+	if (tomHit){
+		var tempMath = Math.sin(Math.PI*(20-screenShake)/20)/2
+		//console.log(tempMath)
+		drawRectangle(0,0,w,w,"red",tempMath)
+	}
+
+	//Draws covers
+	covers.forEach(element => drawImage(element.image,element.x,element.y,1,0));
+
+	if (winner != null){
+		drawRectangle(0,0,w,w,"grey",0.3);
+		ctx.setTransform(1,0,0,1,0,0);
+		ctx.rotate(0);
+		ctx.fillStyle = "#262626"
+		ctx.font = "30px Georgia";
+		ctx.textAlign = "center";
+		ctx.fillText(document.getElementById('player'+(winner+1)).textContent+" WINS", w/2, w/2);
+		if (whistleOn == true) {
+			whistle.play();
+			whistleOn = false;
+		}
+	}
+	if (gameState > 0 && gameState < 180){
+		drawRectangle(0,0,w,w,"grey",0.3);
+		ctx.setTransform(1,0,0,1,0,0);
+		ctx.rotate(0);
+		ctx.font = "24px Georgia";
+		ctx.fillStyle = "#262626";
+		ctx.fillText("YOU", w*0.35,(playernum*w*0.85)+(w*0.1));
+		ctx.font = "30px Georgia";
+
+		ctx.textAlign = "center";
+		let textSt;
+		switch (Math.ceil(gameState/60)){
+			case 1: textSt =  "Look your opponent in the eyes";break;
+			case 2: textSt =  "Fingers on triggers";break;
+			case 3:ctx.font="72px Georgia"; textSt = "DRAW";break;
+			default: textSt = "SOMETHING IS WRONG";break;
+		}
+		gameState++;
+		ctx.fillText(textSt, w/2, w/2);
+		if (gameState == 179) {
+			gameTheme.play();
+		}
+	}
+}
+//Cool function that copied from stack overflow that allows for rotation (DELETE THIS COMMENT EVENTUALLY)
+function drawImage(image, x, y, scale, rotation,opacity=1){
+	ctx.setTransform(scale*bigScale, 0, 0, scale*bigScale, (x+shakeX)*bigScale, (y+shakeY)*bigScale); // sets canvas (0,0) to be the center of the image
+    ctx.rotate(rotation); //Rotates the canvas
+	ctx.globalAlpha = opacity;
+	ctx.drawImage(image, -image.width / 2, -image.height / 2); //Draws the image onto the rotated canvas
+	ctx.globalAlpha = 1;
+}
+function drawRectangle(x,y,x2,y2,colour,opacity){
+	ctx.setTransform(1,0,0,1,0,0);
+	ctx.rotate(0);
+	ctx.globalAlpha = opacity;
+	ctx.beginPath();
+	ctx.rect(x, y, x2, y2);
+	ctx.fillStyle = colour;
+	ctx.fill();
+	ctx.globalAlpha = 1;
+}
+function drawPolygon(p,colour,opacity){
+	ctx.setTransform(1,0,0,1,0,0);
+	ctx.rotate(0);
+	ctx.globalAlpha = opacity;
+	ctx.beginPath();
+	ctx.moveTo(p[0][0],p[0][1]);
+	for (i=1;i<p.length;i++){
+		ctx.lineTo(p[i][0],p[i][1]);
+	}
+	ctx.fillStyle = colour;
+	ctx.fill();
+	ctx.globalAlpha = 1;
+}
+
+function sound(src) {
+  this.sound = document.createElement("audio");
+  this.sound.src = src;
+	this.sound.setAttribute("id", src.slice(0, -4));
+  this.sound.setAttribute("preload", "auto");
+  this.sound.setAttribute("controls", "none");
+  this.sound.style.display = "none";
+  document.body.appendChild(this.sound);
+  this.play = function(){
+    this.sound.play();
+  }
+	this.pause = function(){
+		this.sound.pause();
+	}
+  this.stop = function(){
+		this.sound.pause();
+		this.sound.currentTime = 0;
+  }
+}
+//function drawPolygon([x,y,])
+socket.on('handshake',function(x,ide,mess){
+	playernum = x;
+	id = ide;
+	messages = mess;
+	printmessages();
+});
+
+socket.on("onePlayer",function(name){
+	document.getElementById('player1').textContent = name;
+	document.getElementById('player2').textContent = "Waiting for player two...";
+	document.getElementById('queuePar').textContent = "Waiting...";
+});
+
+socket.on('startPlaying',function(Id1, Id2, Name1, Name2){
+	//console.log("AAHHH")
+	console.log(Id1+" vs "+id);
+	console.log(Id2+" vs "+id);
+	if (Id1==id){
+		playernum=0;
+	}else if(Id2==id){
+		playernum=1;
+	}
+	gameTheme.stop();
+	document.getElementById('player1').textContent = Name1;
+	document.getElementById('player2').textContent = Name2;
+	for (i = 1; i < 4	; i++) {
+		document.getElementById("img" + i + "p1").src = "alive.png";
+		document.getElementById("img" + i + "p2").src = "alive.png";
+
+	document.getElementById("ketchupAnim1").style.animation = "";
+	document.getElementById("ketchupAnim2").style.animation = "";
+	}
+	socket.emit("queueStatus");
+});
+socket.on("startGame",function(coverArr){
+	gameState = 1;
+	whistleOn = false;
+	players = [new Player(250,40,0),new Player(250,460,Math.PI)];
+	projs=[];
+	winner=null;
+	covers=[];
+	coverArr.forEach((elem)=>covers.push(new Cover(elem[0],elem[1])));
+	noCharge=false;
+	currWait=0;
+	EndPoll2([]);
+});
+socket.on('newProj',function(arra){
+	waterShoot.play();
+	projs.push(new projectile(arra[0],arra[1],arra[2],arra[3],arra[4],arra[5],arra[6],arra[7],arra[8]));
+});
+socket.on('newtom',function(arra, player, cooldown){
+	//console.log("adwadwad");
+	tomatoShoot.play();
+	players[player].tomato.create(arra[0],arra[1],arra[2],arra[3],arra[4],arra[5]);
+	// Animates the ketchup bottle upon creation of the tomato, speed is dynamic (based on the cooldown attribute)
+	document.getElementById("ketchupAnim" + (player + 1)).style.animation = "anim-ss steps(30) " + eval(cooldown / 34) + "s"; // 10 shots in 7 sec = cooldown 20
+	if (playernum == player){
+		noCharge=true;
+		currWait = cooldown;
+	};
+});
+socket.on('newCover',function(arra){
+	covers.push(new Cover(arra[0],arra[1]));
+});
+socket.on('destroyCover',function(ind){
+	boxBroken.play();
+	covers.splice(ind,1);
+});
+var winner=null;
+socket.on('Kill',function(num){
+	winner = 1-num;
+	if (num == playernum){
+		console.log("Lose");
+		playernum = 99;
+	}else if (playernum != 99){
+		console.log("Win");
+	}
+	whistleOn=true;
+	players[num].deathAnim = 1;
+	document.getElementById("img3p" + (num + 1)).src = "dead.png";
+	projs= [];
+	EndPoll2([]);
+	timer=1;
+	//players[num].image = confettiImg[0];
+	//players = [new Player(250,40,0),new Player(250,460,Math.PI)];
+	//projs = []; //Creates projectile array
+	/*if (newID == id){
+		playernum = num;
+	}*/
+
+});
+socket.on("Hit",function(num,projNum,crate=null, crate_health){
+	if (num != null) {
+		console.log(playernum,num);
+		playerHit.play();
+		players[num].dmgState+=1;
+		players[num].image=character[players[num].dmgState];
+		document.getElementById("img" + players[num].dmgState + "p" + (num + 1)).src = "dead.png";
+		if (num == playernum){
+			hit=true;
+		}
+		screenShake=20;
+	}else{
+		if (crate_health != 0) {
+		boxHit.play();
+		}
+		covers[crate].dmgState += 1;
+		covers[crate].image = coverImg[covers[crate].dmgState];
+	}
+	var p = projs.filter(obj => {
+		return obj.proId === projNum
+	});
+	p[0].explosing=0;
+});
+var tomHit =false;
+socket.on("tomHit",function(num,projNum){
+	console.log(playernum,num);
+	players[num].dmgState+=1;
+	players[num].image=character[players[num].dmgState];
+	document.getElementById("img" + players[num].dmgState + "p" + (num + 1)).src = "dead.png";
+	if (num == playernum){
+		tomHit=true;
+	}
+	screenShake=20;
+});
+socket.on("tomatoBounceSound", function(){
+	bounce.play();
+});
+socket.on("cheatDone",function(num){
+	cheats[num]=false;
+	try{
+		document.getElementById("button"+(num+1)).style.background = "#d6d3c8";
+	}catch{
+		console.log("Ended")
+	}
+});
+var timer=0;
+var maxtime = 0;
+socket.on("POLL",function(time,options){
+	document.getElementById("button1").style.backgroundColor="#d6d3c8";
+	document.getElementById("button2").style.backgroundColor="#d6d3c8";
+	document.getElementById("button3").style.backgroundColor="#d6d3c8";
+
+	document.getElementById("queue").style.display = "none";
+	document.getElementsByClassName("newPoll")[0].classList.add("enlarge");
+	document.getElementsByClassName("newPoll")[0].classList.remove("reduce");
+	setTimeout(function(){
+		document.getElementsByClassName("newPoll")[0].classList.add("reduce");
+		document.getElementsByClassName("newPoll")[0].classList.remove("enlarge");
+		options.forEach((elem,index)=>{
+			document.getElementById("button"+(index+1)).style.display="inline";
+			document.getElementById("button"+(index+1)).innerHTML = cheatDes[elem]
+		});
+	timer=time;
+	maxtime =time;
+	vote= false;
+}, 2000);
+});
+
+socket.on("ENDPOLL",function(winner){
+	EndPoll2(winner);
+	// for (let i = 0; i<winner.length;i++){
+	// 	console.log("button"+(winner[i]+1));
+	// 		setTimeout(function(){
+	// 			document.getElementById("button"+(winner[i]+1)).style.backgroundColor="#44bd32";
+	// 		}, 2000);
+	// }
+	// setTimeout(function(){
+	// 	document.getElementById("button1").style.display="none";
+	// 	document.getElementById("button2").style.display="none";
+	// 	document.getElementById("button3").style.display="none";
+	// 	document.getElementById("queue").style.display = "block";
+	// },4000);
+	//document.getElementById("button"+(index+1)).innerHTML = cheatDes[elem]
+});
+
+function EndPoll2(winner) {
+	for (let i = 0; i<winner.length;i++){
+		console.log("button"+(winner[i]+1));
+			setTimeout(function(){
+				document.getElementById("button"+(winner[i]+1)).style.backgroundColor="#44bd32";
+			}, 2000);
+	}
+	setTimeout(function(){
+		document.getElementById("button1").style.display="none";
+		document.getElementById("button2").style.display="none";
+		document.getElementById("button3").style.display="none";
+		document.getElementById("queue").style.display = "block";
+	},4000);
+}
+
+socket.on("queuePos", function(position) {
+	par = document.getElementById("queuePar");
+	if (position < 1) {
+		par.textContent = "Playing! Go get them cowboy!";
+	}
+	else if (position % 10 == 1 && (position == 1 || positon > 20)) {
+		par.textContent = position + "st in the queue";
+	}
+	else if (position % 10 == 2 && (position == 2 || positon > 20)) {
+		par.textContent = position + "nd in the queue";
+	}
+	else if (position % 10 == 3 && (position == 3 || positon > 20)) {
+		par.textContent = position + "rd in the queue";
+	}
+	else {
+		par.textContent = position + "th in the queue";
+	}
+});
+
+
+//Update function. Runs every frame
+socket.on('updatePos', function(data) {
+	players[0].x = data[0];
+	players[0].y = data[1];
+	players[0].rot = data[2];
+	players[1].x = data[3];
+	players[1].y = data[4];
+	players[1].rot = data[5];
+
+	if (players[0].tomato.active){
+		players[0].tomato.move();
+	}
+	if (players[1].tomato.active){
+		players[1].tomato.move();
+	}
+	if (players[0].deathAnim>0 && players[0].deathAnim<11){
+		players[0].deathAnim++;
+		players[0].image = confettiImg[Math.floor(players[0].deathAnim/3)]
+	}
+	if (players[1].deathAnim>0 && players[1].deathAnim<11){
+		players[1].deathAnim++;
+		players[1].image = confettiImg[Math.floor(players[1].deathAnim/3)]
+	}
+
+	let reversed = projs.slice(); //Dumb code that makes a copy of the array so we can delete stuff without it messing up
+	//For each projectile
+	reversed.forEach(function(element,ind){
+		element.move(); //Move projectile
+		//If out of bound
+		if (element.active == false){
+			projs.splice(ind,1); //Remove from array
+		}
+	});
+
+	if (screenShake!=0){
+		shakeX = (Math.random()*4)-2;
+		shakeY = (Math.random()*4)-2;
+		screenShake--;
+		//console.log("hey")
+	}else{
+		hit=false;
+		tomHit=false;
+		shakeX=0;
+		shakeY=0;
+	}
+
+	if (charging!=0 && charging<50){charging++}
+
+	if (timer != 0){
+		timer--;
+		document.getElementById("timerBar").style.width=(100*timer/maxtime)+"%";
+	}
+	if (noCharge && currWait==1){
+		noCharge=false;
+		currWait=0;
+	}else if (currWait>1){
+		currWait-=1;
+	}
+	ctx.clearRect(0, 0,w,w);
+	draw();
+	//console.log(keys);
+	if (playernum != 99){socket.emit("mouseUpdate",[mouseX,mouseY])};
+});
+// Activate cheatcode if button pressed and make it look un/pressed
+var vote = false;
+function cheatVote(cheatcode) {
+	if (!vote){
+		vote=true;
+		socket.emit("votes",cheatcode);
+		try{
+		document.getElementById("button"+(cheatcode+1)).style.background = "orange";
+		}catch{
+			console.log("Started")
+		}
+	}
+}
+
+// Get message from entry and put it in front of the array
+function messagesend() {
+	var message = document.getElementById("textentry").value;
+	// If message is empty then exit
+	if (message == "")
+		return;
+	messages.push([userName,message]);
+	socket.emit('chatMessage',message);
+	document.getElementById("textentry").value = "";
+	printmessages();
+}
+socket.on('chatMessage', function(mes,sendUser) {
+	//console.log(sendId);
+	//console.log(id);
+	if (sendUser != userName){
+		messages.push([sendUser,mes]);
+		printmessages();
+	}
+});
+// Prints the array
+function printmessages() {
+	// Remove all previous messages
+	var messagespace = document.getElementById("messagebox");
+	messagespace.textContent = "";
+	// Print out the messages from bottom to top
+	for (i = 0; i < messages.length; i++) {
+		var namePara = document.createElement("p");
+		var name = document.createTextNode(messages[i][0]);
+		namePara.appendChild(name);
+		namePara.classList.add("nameBox");
+		namePara.style.bottom = "0.5em";
+
+		//paragraph.appendChild(document.createElement("br"));
+		var paragraph = document.createElement("p");
+		var text = document.createTextNode(messages[i][1]);
+		paragraph.appendChild(text);
+		paragraph.classList.add("messBox");
+		paragraph.style.bottom = "1em";
+		if (messages[i][0]==userName){
+			paragraph.style.left = "1em";
+			namePara.style.left = "1.2em";
+		}else{
+			paragraph.style.textAlign = "right";
+			paragraph.style.marginLeft = "auto";
+			paragraph.style.marginRight = "1em";
+			namePara.style.left = "1em";
+			namePara.style.marginLeft = "auto";
+			namePara.style.marginRight = "2.2em";
+			paragraph.style.backgroundColor = "#B68B60";
+		}
+		messagespace.appendChild(namePara);
+		messagespace.appendChild(paragraph);
+	}
+	chatbox.scrollTop = chatbox.scrollHeight;
+}
+//update leaderboard - there is one issue with it (current player's rank wont show until they die) also not sure how to get the leaderboard to show once game starts - atm it shows after the second kill
+socket.on('leaderboard',function(topTen){updateLeaderboard(topTen)});
+function updateLeaderboard(topTen){
+	console.log(topTen);
+	var id = ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"]
+	var id2 = ["score1", "score2", "score3", "score4", "score5", "score6", "score7", "score8", "score9", "score10"]
+	for (var i=0; i<topTen.length; i++){
+
+		document.getElementById(id[i]).innerHTML = topTen[i][0]
+		document.getElementById(id2[i]).innerHTML = topTen[i][2]
+
+	}
+};
+var screenShake = 0;
+var hit= true;
+var shakeX = 0;
+var shakeY = 0;
+
+//On keydown event
+window.addEventListener('keydown', function(event) {
+	let active = document.activeElement
+	let te = document.getElementById("textentry")
+	if (active != te){
+		if (event.key === "w") {
+			keys[0]=true;
+		}else if(event.key === "a"){
+			keys[1]=true;
+		}else if(event.key === "s"){
+			keys[2]=true;
+		}else if(event.key === "d"){
+			keys[3]=true;
+		}
+		if (playernum != 99){socket.emit("input",keys)};
+	}
+});
+//On keyup event
+window.addEventListener('keyup', function(event) {
+	if (event.key === "w") {
+    	keys[0]=false;
+  	}else if(event.key === "a"){
+	  	keys[1]=false;
+  	}else if(event.key === "s"){
+	  	keys[2]=false;
+  	}else if(event.key === "d"){
+	  	keys[3]=false;
+  	}
+		else if(event.key ==="Enter"){
+			messagesend();
+		}
+	if (playernum != 99){socket.emit("input",keys)};
+});
+//On mouse move event
+myCanvas.addEventListener('mousemove', function(event) {
+    mouseX = event.offsetX/bigScale;
+    mouseY = event.offsetY/bigScale;
+});
+//On mouse click event
+myCanvas.addEventListener('click', function(event) {
+	mouseX = event.offsetX/bigScale;
+  mouseY = event.offsetY/bigScale;
+	socket.emit("mouseClick",[mouseX,mouseY]);
+});
+var charging = 0;
+myCanvas.addEventListener('mousedown', function(ev) {
+	if (ev.button == 2 && (!noCharge) &&gameState>179){
+		ev.preventDefault();
+		charging=1;
+		if (playernum != 99){socket.emit("rightDown")};
+		return false;
+	}
+}, false);
+myCanvas.addEventListener('mouseup', function(ev) {
+	if (ev.button == 2 && (!noCharge)&&gameState>179){
+		ev.preventDefault();
+		//console.log("DIKdhoaodhqjwdhuj");
+		mouseX = event.offsetX/bigScale;
+		mouseY = event.offsetY/bigScale;
+		charging = 0;
+		if (playernum != 99){socket.emit("rightUp",[mouseX,mouseY])};
+		return false;
+	}
+}, false);
+myCanvas.addEventListener('contextmenu', function(ev) {
+	ev.preventDefault();
+	return false;
+}, false);
+// Deletes the animation attribute from ketchup so it can be triggered again
+document.getElementById("ketchupAnim1").addEventListener('animationend', () => {
+  document.getElementById("ketchupAnim1").style.animation = "";
+});
+document.getElementById("ketchupAnim2").addEventListener('animationend', () => {
+  document.getElementById("ketchupAnim2").style.animation = "";
+});
+
+
+
+window.addEventListener('resize',resizeCanvas);
+
+draw(); //Inital drawing of canvas
+</script>
+</html>

@@ -1,0 +1,259 @@
+@font-face {
+font-family: 'Typodermic-Regular';
+font-style: normal;
+font-weight: normal;
+src: local('Typodermic-Regular'), url('typodermic.woff') format('woff');
+}
+
+body{
+    /*background-image:url("./DemocraticMayhemLanding.png");
+    background-repeat: no-repeat;
+    background-size: cover;*/
+    background-color: #8d8373;
+}
+#myCanvas {
+  border:1px solid #000000;
+  display: block;
+  float: left;
+}
+
+.content{
+  display: flex;
+  justify-content: center;
+  /*align-items: center;*/
+}
+
+.leftside{
+  display: flex;
+  flex-direction: column;
+}
+
+.leftside p {
+  font-family: 'Typodermic-Regular';
+  display: inline;
+  color: white;
+  font-size: 1.5em;
+  padding: 0.5em;
+  vertical-align: middle;
+  width: inherit;
+  background-color: #4f3c1f;
+  height: 1em;
+  margin: 0px;
+}
+
+.healthbar img{
+  position: relative;
+  bottom: 0.25em;
+  vertical-align: middle;
+}
+
+#ketchup1, #ketchup2{
+  height: 50px;
+}
+
+#ketchupAnim1, #ketchupAnim2 {
+  background: url("ketchupAnim.png") 0 0 no-repeat;
+  background-size: 15100%; /* Number of frames in the spritesheet */
+  /* animation: anim-ss steps(30) 1s; */
+}
+@keyframes anim-ss { 0% {background-position: 0%;} 100% {background-position: 100%;} }
+
+.rightside {
+  float: left;
+  margin-left: 1em;
+  height:80%;
+  overflow: hidden;
+  width: 27em;
+}
+
+#saloon {
+  font-family: 'Typodermic-Regular';
+  color: white;
+  text-align: center;
+  font-size: 2em;
+  padding: 0.4em;
+  bottom: 0.4em;
+  background-color: #4f3c1f;
+  /* height: 1em; */
+  position: relative;
+  z-index: 5;
+  /* margin-bottom: -1em; */
+}
+
+.poll {
+  padding: 1em;
+  background-color: #4f3c1f;
+  height: 5em;
+  position: relative;
+}
+
+.poll button {
+  width: 8em;
+  height: 5em;
+  background-color: #d6d3c8;
+  font-family: "Georgia";
+  font-size: 1em;
+  position: absolute;
+}
+
+#button2 {
+  left: 9.5em;
+}
+
+#button3 {
+  left: 18em;
+}
+
+#chatbox {
+  margin-top: 1em;
+  width: inherit;
+  top: 22%;
+  height: 61.5%;
+  position: absolute;
+  background-color: #bdb8a6;
+  overflow-y: scroll;
+}
+
+#typingbox {
+  position: absolute;
+  top: 85.4%;
+}
+
+#textentry {
+  background-color: #d6d3c8;
+  position: relative;
+  width: 26.55em;
+  height: 4em;
+}
+
+#sendButton {
+  background-color: #4f3c1f;
+  color: white;
+  position: relative;
+  right: 0.45em;
+  width: 5.5em;
+  height: 4.5em;
+}
+
+#messagebox p{
+  position: relative;
+  word-wrap: break-word;
+  width:fit-content;
+  max-width: 20em;
+  padding: 0.2em;
+  margin-bottom: -0.5em;
+  text-align: left;
+  font-family: "Georgia";
+}
+
+#queue {
+  position: relative;
+  display: block;
+  font-family: 'Typodermic-Regular';
+  color: white;
+  text-align: center;
+  font-size: 2em;
+  bottom: 0.7em;
+  line-height: 0.4;
+}
+
+#timerBar{
+  width:0%;
+  background-color: rgb(199, 155, 34);
+  height:10px;
+  bottom: 0%;
+  left:0%;
+  position:absolute;
+}
+@keyframes example {
+  0%   {font-size: 0em;}
+  20%  {font-size: 0.4em;}
+  40%  {font-size: 0.8em;}
+  60%  {font-size: 1.2em;}
+  80%  {font-size: 1.6em;}
+  100%  {font-size: 2em;}
+
+}
+.newPoll{
+  text-align: center;
+  position: relative;
+  /* justify-content: center; */
+  align-items: center;
+  /* vertical-align: middle; */
+  font-size: 0em;
+  color: white;
+  letter-spacing: 0.1rem;
+  font-family: "Georgia";
+  transition-timing-function: linear;
+}
+.newPoll.enlarge {
+  font-family: 'Typodermic-Regular';
+  transition: all 0.5s ease;
+  transform: scale(2);
+  font-size: 1.5em;
+}
+
+.newPoll.reduce{
+  transition: font-size 0s;
+  font-size: 0em;
+}
+
+.wanted {
+  font-family: 'Typodermic-Regular';
+  font-size: 2em;
+  margin: 0.6em;
+  padding-bottom: 0.1em;
+}
+
+#bulletHole1 {
+  position: relative;
+  top: 0.4em;
+}
+
+#bulletHole2 {
+  position: relative;
+  top:-0.2em;
+  left: -0.1em;
+}
+
+#bulletHole3 {
+  position: relative;
+  top: -0.6em;
+}
+
+.leaderboard {
+  float: left;
+  top:0%;
+  margin-left: 1em;
+  padding: 0em 0.1em 0.2em 0.1em;
+  /* height:80%; */
+  width: 20em;
+  background-color: #bdb8a6;
+  text-align: center;
+}
+
+#table{
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
+
+.messBox {
+  filter: drop-shadow(0 0 0.5rem rgb(105, 85, 60,0.2));
+  color: white;
+  font-size: large;
+  background-color: #4f3c1f;
+}
+
+.nameBox{
+  font-size: smaller;
+  color: #574831;
+}
+#leaderTable td, #customers th {
+  /*border: 1px solid #ddd;*/
+  width: 200%;
+  padding: 0.5em;
+}
+#leaderTable tr:nth-child(even){
+  background-color:  #a7a18f;
+}
