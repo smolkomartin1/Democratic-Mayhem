@@ -16,3 +16,9 @@ Featuring a **polling system** enables spectators and players alike to control w
 With practice, skill and more tomatoes than a ketchup factory, you too can have a spot on the **Most Wanted list!** 
 
 *See you there!*
+
+## Credits
+A huge thank you to everyone in my team, it was a pleasure creating something we can be proud of together!
+
+| Henry Dorrance | Christine Voong | Hank Bell | Maryam Alkhowildi | Leon Faria |
+| :-: | :-: | :-: | :-: | :-: |
