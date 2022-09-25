@@ -13,4 +13,6 @@ Everyone waiting their turn can alter the game with different power-ups causing 
 
 Featuring a **polling system** enables spectators and players alike to control which power-ups are applied, while the intuitive **chat panel** allows players to communicate with each other and plan the **ultimate power-up havoc!** 
 
-With practice, skill and more tomatoes than a ketchup factory, you too can have a spot on the **Most Wanted list!** *See you there!*
+With practice, skill and more tomatoes than a ketchup factory, you too can have a spot on the **Most Wanted list!** 
+
+*See you there!*
